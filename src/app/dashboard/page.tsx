@@ -15,7 +15,7 @@ import Link from "next/link";
 
 const Dashboard = () => {
   return (
-    <main className="flex flex-col justify-center h-full gap-6 text-center max-w-5xl mx-auto my-12">
+    <main className="flex flex-col justify-center h-full gap-6 text-center max-w-5xl mx-12 my-12">
       <div className="flex justify-between">
         <h1 className="text-3xl font-semibold">Invoices</h1>
         <p>
