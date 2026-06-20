@@ -12,8 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
 import Link from "next/link";
+import { db } from "@/db";
+import { Invoices } from "@/db/schema";
 
-const Dashboard = () => {
+const Dashboard = async () => {
+  const results = await db.select().from(Invoices);
+  console.log(results);
   return (
     <main className="flex flex-col justify-center h-full gap-6 text-center max-w-5xl mx-12 my-12">
       <div className="flex justify-between">
@@ -31,31 +35,48 @@ const Dashboard = () => {
         <TableCaption>A list of your recent invoices.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px] p-4">Date</TableHead>
-            <TableHead className="p-4">Customer</TableHead>
-            <TableHead className="p-4">Email</TableHead>
-            <TableHead className="p-4">Status</TableHead>
+            <TableHead className="w-[100px] text-left p-4">Date</TableHead>
+            <TableHead className="text-left p-4">Customer</TableHead>
+            <TableHead className="text-left p-4">Email</TableHead>
+            <TableHead className="text-left p-4">Status</TableHead>
             <TableHead className="text-right p-4">Value</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell className="font-medium text-center p-4">
-              <span className="font-semibold">6/20/2026</span>
-            </TableCell>
-            <TableCell className="text-left p-4">
-              <span className="font-semibold">Thierry Laguerre</span>
-            </TableCell>
-            <TableCell className="text-left p-4">
-              <span>thierry@donotreply.com</span>
-            </TableCell>
-            <TableCell className="text-center p-4">
-              <Badge className="rounded-full">Open</Badge>
-            </TableCell>
-            <TableCell className="text-right p-4">
-              <span className="font-semibold">$250.00</span>
-            </TableCell>
-          </TableRow>
+          {results.map((result) => {
+            return (
+              <TableRow key={result.id}>
+                <TableCell className="p-0 font-medium text-left">
+                  <Link href={``} className="font-semibold block p-4">
+                    {new Date(result.createTs).toLocaleDateString()}
+                  </Link>
+                </TableCell>
+                <TableCell className="p-0 text-left">
+                  <Link href={``} className="font-semibold block p-4">
+                    Thierry Laguerre
+                  </Link>
+                </TableCell>
+                <TableCell className="p-0 text-left">
+                  <Link href={``} className="block p-4">
+                    thierry@donotreply.com
+                  </Link>
+                </TableCell>
+                <TableCell className="p-0 text-left">
+                  <Link href={``} className="block p-4">
+                    <Badge className="rounded-full">{result.status}</Badge>
+                  </Link>
+                </TableCell>
+                <TableCell className="p-0 text-right">
+                  <Link
+                    href={`/invoices/${result.id}`}
+                    className="font-semibold block p-4"
+                  >
+                    ${(result.value / 100).toFixed(2)}
+                  </Link>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </main>
