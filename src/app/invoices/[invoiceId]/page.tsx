@@ -9,7 +9,7 @@ const InvoicePage = async ({ params }: { params: { invoiceId: string } }) => {
   const { invoiceId } = await params;
 
   if (isNaN(parseInt(invoiceId))) {
-    throw new Error("Invalid invoice id");
+    // throw new Error("Invalid invoice id");
     return <InvoiceNotFound />;
   }
 
@@ -20,7 +20,8 @@ const InvoicePage = async ({ params }: { params: { invoiceId: string } }) => {
     .limit(1);
 
   if (!result) {
-    return(<InvoiceNotFound/>)
+    notFound()
+    // return(<InvoiceNotFound/>)
   }
   return (
     <main className="h-full gap-6 max-w-5xl mx-12 my-12">
