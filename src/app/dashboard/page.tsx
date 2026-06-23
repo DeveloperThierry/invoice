@@ -15,12 +15,15 @@ import Link from "next/link";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import Container from "@/components/Container";
 
 const Dashboard = async () => {
   const results = await db.select().from(Invoices);
   console.log(results);
   return (
-    <main className="flex flex-col justify-center h-full gap-6 text-center max-w-5xl mx-12 my-12">
+    <main className="h-full ">
+      <Container>
+
       <div className="flex justify-between">
         <h1 className="text-3xl font-semibold">Invoices</h1>
         <p>
@@ -72,7 +75,7 @@ const Dashboard = async () => {
                         result.status === "void" && "bg-zinc-700",
                         result.status === "uncollectible" && "bg-red-600"
                       )}
-                    >
+                      >
                       {result.status}
                     </Badge>
                   </Link>
@@ -81,7 +84,7 @@ const Dashboard = async () => {
                   <Link
                     href={`/invoices/${result.id}`}
                     className="font-semibold block p-4"
-                  >
+                    >
                     ${(result.value / 100).toFixed(2)}
                   </Link>
                 </TableCell>
@@ -90,6 +93,7 @@ const Dashboard = async () => {
           })}
         </TableBody>
       </Table>
+          </Container>
     </main>
   );
 };
