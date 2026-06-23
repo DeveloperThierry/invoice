@@ -22,7 +22,7 @@ export default function Home() {
             </Show> */}
       <p>
         <Button asChild>
-          <Link href="/dashboard">Sign Up</Link>
+          <Link href="/dashboard">Continue</Link>
         </Button>
       </p>
     </main>

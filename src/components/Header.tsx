@@ -14,7 +14,6 @@ const Header = () => {
           <div>
             <Show when="signed-out">
               <SignInButton />
-              <SignUpButton />
             </Show>
             <Show when="signed-in">
               <UserButton />

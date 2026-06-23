@@ -2,10 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import InvoiceNotFound from "./not-found";
+import {auth} from "@clerk/nextjs/server"
 const InvoicePage = async ({ params }: { params: { invoiceId: string } }) => {
+  const {userId} = await auth()
+  if(!userId) return
   const { invoiceId } = await params;
 
   if (isNaN(parseInt(invoiceId))) {
@@ -16,7 +19,7 @@ const InvoicePage = async ({ params }: { params: { invoiceId: string } }) => {
   const [result] = await db
     .select()
     .from(Invoices)
-    .where(eq(Invoices.id, parseInt(invoiceId)))
+    .where(and(eq(Invoices.id, parseInt(invoiceId)), eq(Invoices.userId, userId)))
     .limit(1);
 
   if (!result) {
