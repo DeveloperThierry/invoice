@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
+import { Customers, Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import Container from "@/components/Container";
 import {auth} from "@clerk/nextjs/server"
@@ -21,7 +21,12 @@ import {eq} from "drizzle-orm"
 const Dashboard = async () => {
   const {userId} = await auth()
   if(!userId) return
-  const results = await db.select().from(Invoices).where(eq(Invoices.userId, userId));
+  const results = await db.select().from(Invoices).innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+  .where(eq(Invoices.userId, userId));
+
+  const invoices = results?.map(({invoices, customers})=> {
+    return({...invoices, customer:customers})
+  })
   return (
     <main className="h-full ">
       <Container>
@@ -49,7 +54,7 @@ const Dashboard = async () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {results.map((result) => {
+          {invoices.map((result) => {
             return (
               <TableRow key={result.id}>
                 <TableCell className="p-0 font-medium text-left">
@@ -59,12 +64,12 @@ const Dashboard = async () => {
                 </TableCell>
                 <TableCell className="p-0 text-left">
                   <Link href={``} className="font-semibold block p-4">
-                    Thierry Laguerre
+                    {result.customer.name}
                   </Link>
                 </TableCell>
                 <TableCell className="p-0 text-left">
                   <Link href={``} className="block p-4">
-                    thierry@donotreply.com
+                  {result.customer.email}
                   </Link>
                 </TableCell>
                 <TableCell className="p-0 text-left">
