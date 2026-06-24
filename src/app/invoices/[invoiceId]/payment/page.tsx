@@ -4,7 +4,7 @@ import { Customers, Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { eq, and, isNull } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import InvoiceNotFound from "./not-found";
+// import InvoiceNotFound from "../not-found";
 import { auth } from "@clerk/nextjs/server";
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
@@ -29,35 +29,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-const Invoice = async ({ params }: { params: { invoiceId: string } }) => {
-  const { userId, orgId } = await auth();
-  if (!userId) return;
+const Payment = async ({ params }: { params: { invoiceId: string } }) => {
   const { invoiceId } = await params;
   if (isNaN(parseInt(invoiceId))) {
-    // throw new Error("Invalid invoice id");
-    return <InvoiceNotFound />;
+    throw new Error("Invalid invoice id");
+    // return <InvoiceNotFound />;
   }
-  
-  let result;
-  if (orgId){
-    [result] = await db
-    .select()
+  const [result] = await db
+    .select({
+        id: Invoices.id,
+        status: Invoices.status,
+        createTs:Invoices.createTs,
+        description: Invoices.description,
+        value: Invoices.value,
+        name: Customers.name,
+    })
     .from(Invoices)
     .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
-    .where(
-      and(eq(Invoices.id, parseInt(invoiceId)), eq(Invoices.organizationId, orgId))
-    )
+    .where(eq(Invoices.id, parseInt(invoiceId)))
     .limit(1);
-  }else{
-    [result] = await db
-    .select()
-    .from(Invoices)
-    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
-    .where(
-      and(eq(Invoices.id, parseInt(invoiceId)), eq(Invoices.userId, userId), isNull(Invoices.organizationId))
-    )
-    .limit(1);
-  }
 
   if (!result) {
     notFound();
@@ -65,9 +55,11 @@ const Invoice = async ({ params }: { params: { invoiceId: string } }) => {
   }
 
   const invoice = {
-    ...result.invoices,
-    customer:result.customers
-  }
+    ...result,
+    customer: {
+        name:result.name
+    },
+  };
   return (
     <main className="w-full h-full gap-6">
       <Container>
@@ -128,15 +120,23 @@ const Invoice = async ({ params }: { params: { invoiceId: string } }) => {
               </DropdownMenu>
               <DialogContent className="bg-white">
                 <DialogHeader className="gap-2">
-                  <DialogTitle className="text-2xl">Delete Invoice?</DialogTitle>
+                  <DialogTitle className="text-2xl">
+                    Delete Invoice?
+                  </DialogTitle>
                   <DialogDescription>
                     This action cannot be undone. This will permanently delete
                     your invoice from our servers.
                   </DialogDescription>
                   <DialogFooter>
-                    <form action={deleteInvoiceAction} className="flex justify-center itms-center text-center">
+                    <form
+                      action={deleteInvoiceAction}
+                      className="flex justify-center itms-center text-center"
+                    >
                       <input type="hidden" name="id" value={invoiceId} />
-                      <Button variant="destructive" className="flex items-center gap-2">
+                      <Button
+                        variant="destructive"
+                        className="flex items-center gap-2"
+                      >
                         <Trash2 className="w-4 h-auto" /> Delete Invoice
                       </Button>
                     </form>
@@ -168,16 +168,10 @@ const Invoice = async ({ params }: { params: { invoiceId: string } }) => {
             </strong>
             <p>{invoice.customer.name}</p>
           </li>
-          <li className="flex gap-4">
-            <strong className="block w-28 flex-shrink-0 font-medium text-sm">
-              Billing Email
-            </strong>
-            <p>{invoice.customer.email}</p>
-          </li>
         </ul>
       </Container>
     </main>
   );
 };
 
-export default Invoice;
+export default Payment;
