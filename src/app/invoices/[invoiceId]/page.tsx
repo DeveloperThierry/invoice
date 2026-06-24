@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 import { updateStatusAction, deleteInvoiceAction } from "@/app/actions";
-import { ChevronDown, Ellipsis, Trash2 } from "lucide-react";
+import { ChevronDown, CreditCard, Ellipsis, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 const Invoice = async ({ params }: { params: { invoiceId: string } }) => {
   const { userId, orgId } = await auth();
   if (!userId) return;
@@ -123,6 +124,14 @@ const Invoice = async ({ params }: { params: { invoiceId: string } }) => {
                         <Trash2 className="w-4 h-auto" /> Delete Invoice
                       </button>
                     </DialogTrigger>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={`/invoices/${invoice.id}/payment`}>
+                    <CreditCard/>
+                      <button className="flex items-center gap-2">
+                      Payment
+                      </button>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
