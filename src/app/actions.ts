@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import Stripe from "stripe"
+import { headers } from "next/headers";
 
 const stripe = new Stripe(String(process.env.STRIPE_API_SECRET!));
 
@@ -72,29 +73,36 @@ export const deleteInvoiceAction = async (formData: FormData) => {
     
   redirect("/dashboard");
 };
-
-export const createPayment = async (formData:FormData) => {
-  const id = parseInt(formData.get("id") as string)
+export const createPayment = async (formData: FormData) => {
+  const headersList = await headers();
+  const origin = headersList.get('origin');
+  const id = parseInt(formData.get("id") as string);
+  
   const [result] = await db.select({
-    status:Invoices.status,
-    value:Invoices.value
-  }).from(Invoices).where(eq(Invoices.id, id)).limit(1)
+    status: Invoices.status,
+    value: Invoices.value
+  }).from(Invoices).where(eq(Invoices.id, id)).limit(1);
 
-  console.log(result)
+  console.log(result);
+  
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
-        // Provide the exact Price ID (for example, price_1234) of the product you want to sell
         price_data: {
-          currency:'usd',
-          product: 'prod_UlEVcRsyreUrfC',
-          unit_amount:result.value
+          currency: 'usd',
+          product_data: {
+            name: `Invoice #${id}`, 
+          },
+          unit_amount: result.value, 
         },
-        price: '{{PRICE_ID}}',
         quantity: 1,
       },
     ],
     mode: 'payment',
-    success_url: `${origin}/invoices/${id}?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${origin}/invoices/${id}/payment?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/invoices/${id}`, 
   });
-}
+
+  if (!session.url) throw new Error('Invalid session');
+  redirect(session.url);
+};
