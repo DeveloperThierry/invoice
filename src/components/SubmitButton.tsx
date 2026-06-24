@@ -7,7 +7,6 @@ import { LoaderCircle } from "lucide-react";
 
 const SubmitButton = () => {
   const { pending } = useFormStatus();
-  console.log("pending", pending);
   return (
     <Button className="relative w-full font-semibold py-6" disabled={pending}>
       <span className={pending ? "text-transparent" : ""}>Submit</span>

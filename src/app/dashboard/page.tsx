@@ -22,7 +22,6 @@ const Dashboard = async () => {
   const {userId} = await auth()
   if(!userId) return
   const results = await db.select().from(Invoices).where(eq(Invoices.userId, userId));
-  console.log(results);
   return (
     <main className="h-full ">
       <Container>
