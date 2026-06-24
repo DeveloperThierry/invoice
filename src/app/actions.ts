@@ -72,3 +72,29 @@ export const deleteInvoiceAction = async (formData: FormData) => {
     
   redirect("/dashboard");
 };
+
+export const createPayment = async (formData:FormData) => {
+  const id = parseInt(formData.get("id") as string)
+  const [result] = await db.select({
+    status:Invoices.status,
+    value:Invoices.value
+  }).from(Invoices).where(eq(Invoices.id, id)).limit(1)
+
+  console.log(result)
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        // Provide the exact Price ID (for example, price_1234) of the product you want to sell
+        price_data: {
+          currency:'usd',
+          product: 'prod_UlEVcRsyreUrfC',
+          unit_amount:result.value
+        },
+        price: '{{PRICE_ID}}',
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    success_url: `${origin}/invoices/${id}?session_id={CHECKOUT_SESSION_ID}`,
+  });
+}
