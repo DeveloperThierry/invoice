@@ -18,7 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
-import { updateStatusAction, deleteInvoiceAction, createPayment } from "@/app/actions";
+import {
+  updateStatusAction,
+  deleteInvoiceAction,
+  createPayment,
+} from "@/app/actions";
 import { Check, ChevronDown, CreditCard, Ellipsis, Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -29,11 +33,40 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-const Payment = async ({ params }: { params: { invoiceId: string } }) => {
+import Stripe from "stripe";
+interface InvoicePaymentProps {
+  params: { invoiceId: string };
+  searchParams: { status: string; session_id: string };
+}
+const stripe = new Stripe(String(process.env.STRIPE_API_SECRET!));
+const Payment = async ({ params, searchParams }: InvoicePaymentProps) => {
   const { invoiceId } = await params;
+  const resolvedSearchParams = await searchParams;
+
   if (isNaN(parseInt(invoiceId))) {
     throw new Error("Invalid invoice id");
     // return <InvoiceNotFound />;
+  }
+
+  const sessionId = resolvedSearchParams.session_id;
+  const isSuccess = sessionId && resolvedSearchParams.status === "success";
+  const isCanceled = resolvedSearchParams.status === "canceled";
+  let isError = (isSuccess && !sessionId);
+
+  console.log("success", isSuccess);
+  console.log("canceled", isCanceled);
+
+  if (isSuccess) {
+    const {payment_status} = await stripe.checkout.sessions.retrieve(sessionId);
+    if(payment_status !== 'paid') {
+      isError=true
+    }else{
+      const formData = new FormData();
+      formData.append("id", String(invoiceId));
+      formData.append("status", "paid");
+      formData.append("revalidate", "false")
+      await updateStatusAction(formData);
+    }
   }
   const [result] = await db
     .select({
@@ -63,6 +96,16 @@ const Payment = async ({ params }: { params: { invoiceId: string } }) => {
   return (
     <main className="w-full h-full gap-6">
       <Container>
+        {isError && (
+          <p className="bg-red-100 text-red-800 text-center px-3 py-2 rounded-lg mb-6 text-sm">
+            Something went wrong, please try again
+          </p>
+        )}
+        {isCanceled && (
+          <p className="bg-yellow-100 text-red-800 text-center px-3 py-2 rounded-lg mb-6 text-sm">
+            Payment was cancelled, please try again
+          </p>
+        )}
         <div className="grid grid-cols-2">
           <div className="">
             <div className="flex justify-between mb-8">
@@ -80,25 +123,25 @@ const Payment = async ({ params }: { params: { invoiceId: string } }) => {
                   {invoice.status}
                 </Badge>
               </h1>
-              
             </div>
             <p className="text-3xl mb-3">${(invoice.value / 100).toFixed(2)}</p>
             <p className="text-lg mb-8">{invoice.description}</p>
           </div>
           <div>
             <h2 className="text-xl font-bold mb-4">Manage Invoice</h2>
-            {invoice.status === 'open' ? (
-            <form action={createPayment}>
-              <input type="hidden" name="id" value={invoice.id}/>
+            {invoice.status === "open" ? (
+              <form action={createPayment}>
+                <input type="hidden" name="id" value={invoice.id} />
                 <Button className="flex gap-2 font-bold bg-green-700">
-                <CreditCard className="w-5 h-auto"/>
-                    Pay Invoice
+                  <CreditCard className="w-5 h-auto" />
+                  Pay Invoice
                 </Button>
-            </form>
-            ): (
-                <p className="flex gap-2 items-center text-xl font-bold">
-                    <Check className="w-8 h-auto bg-green-500 rounded-full text-white p-1"/>
-                    Invoice Paid</p>
+              </form>
+            ) : (
+              <p className="flex gap-2 items-center text-xl font-bold">
+                <Check className="w-8 h-auto bg-green-500 rounded-full text-white p-1" />
+                Invoice Paid
+              </p>
             )}
           </div>
         </div>

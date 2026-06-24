@@ -40,6 +40,7 @@ export const updateStatusAction = async (formData: FormData) => {
 
   const id = formData.get("id") as string;
   const status = formData.get("status") as Status;
+  const shouldRevalidate = formData.get("revalidate") !== "false";
   if(orgId){
     await db
     .update(Invoices)
@@ -53,7 +54,7 @@ export const updateStatusAction = async (formData: FormData) => {
   }
   
 
-  revalidatePath(`/invoices/${id}`, 'page');
+  if(shouldRevalidate) revalidatePath(`/invoices/${id}`, 'page');
 };
 
 export const deleteInvoiceAction = async (formData: FormData) => {
@@ -99,8 +100,8 @@ export const createPayment = async (formData: FormData) => {
       },
     ],
     mode: 'payment',
-    success_url: `${origin}/invoices/${id}/payment?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/invoices/${id}`, 
+    success_url: `${origin}/invoices/${id}/payment?status=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/invoices/${id}/payment?status=canceled&session_id={CHECKOUT_SESSION_ID}`, 
   });
 
   if (!session.url) throw new Error('Invalid session');
