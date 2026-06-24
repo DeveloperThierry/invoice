@@ -1,3 +1,11 @@
+![Screenshot](public/imgs/1.png)
+![Screenshot](public/imgs/2.png)
+![Screenshot](public/imgs/3.png)
+![Screenshot](public/imgs/4.png)
+![Screenshot](public/imgs/5.png)
+![Screenshot](public/imgs/6.png)
+![Screenshot](public/imgs/7.png)
+![Screenshot](public/imgs/8.png)
 # Invoice App - Next.js 15 Project
 
 This project is a full-stack Invoice Management Application built with Next.js 15. It demonstrates modern web development practices including authentication, database management, transactional emails, and payment processing.
