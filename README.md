@@ -6,9 +6,11 @@
 ![Screenshot](public/imgs/6.png)
 ![Screenshot](public/imgs/7.png)
 ![Screenshot](public/imgs/8.png)
-# Invoice App - Next.js 15 Project
 
-This project is a full-stack Invoice Management Application built with Next.js 15. It demonstrates modern web development practices including authentication, database management, transactional emails, and payment processing.
+# 🚀 Enterprise Invoice App (Next.js 15 & React 19)
+
+A production-ready, full-stack invoice management platform built with **Next.js 15** and **React 19**. This application demonstrates modern web architecture, utilizing Server Actions, secure multi-tenant authentication, and a robust payment gateway integration.
+
 
 ## Key Features
 
@@ -30,9 +32,6 @@ This project is a full-stack Invoice Management Application built with Next.js 1
 - **Payments:** Stripe
 - **Email:** Resend, React Email
 
-## Getting Started
+## 📄 License
 
-1. **Initialize Project:** Create a new Next.js 15 application.
-2. **Configuration:** Set up your environment variables for Clerk, Xata, Stripe, and Resend in your `.env.local` file.
-3. **Database Setup:** Define your schemas in `src/db/schema.ts` and run migrations using Drizzle Kit.
-4. **Development:** Run the application locally to test features like invoice creation, status updates, and payment flows.
+This project is licensed under the MIT License. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
